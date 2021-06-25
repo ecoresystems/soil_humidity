@@ -1,3 +1,7 @@
 msg_receiver_env/
 msg_receiver.sock/
 __pycache__/
+
+.idea
+
+*.db
