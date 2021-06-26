@@ -53,6 +53,8 @@ def device_registration():
     password = info["password"]
     cursor.execute(queries.get_user_password(user_name))
     user_info = cursor.fetchone()
+    print(info)
+    print(user_info)
     if user_info is None:
         return jsonify("User not found"), 404
     if bcrypt.check_password_hash(password, user_info[0]):

@@ -24,7 +24,8 @@ class Queries:
             "DEVICE_LOCATION VARCHAR(50),"
             "DESCRIPTION VARCHAR(100),"
             "AUTHORIZATION_TOKEN VARCHAR(32) NOT NULL,"
-            "REGISTRATION_TIME TIMESTAMP NOT NULL)"
+            "REGISTRATION_TIME TIMESTAMP NOT NULL,"
+            "DEVICE_MODEL VARCHAR(30) NOT NULL)"
         )
 
     @staticmethod
@@ -59,10 +60,12 @@ class Queries:
         device_location: str,
         description: str,
         authorization_token: str,
+        device_model:str
     ):
         return (
-            f"INSERT INTO DEVICES (DEVICE_SERIAL,DEVICE_LOCATION,DESCRIPTION,AUTHORIZATION_TOKEN,REGISTRATION_TIME)"
-            f"VALUES ('{device_serial}','{device_location}','{description}','{authorization_token}','{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}')"
+            f"INSERT INTO DEVICES (DEVICE_SERIAL,DEVICE_LOCATION,DESCRIPTION,AUTHORIZATION_TOKEN,REGISTRATION_TIME,DEVICE_MODEL)"
+            f"VALUES ('{device_serial}','{device_location}','{description}','{authorization_token}','{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}',"
+            f"'{device_model}')"
         )
 
     @staticmethod
