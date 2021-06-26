@@ -11,10 +11,11 @@ from flask_bcrypt import Bcrypt
 
 from queries import Queries
 
-config = configparser.ConfigParser()
-config.read("config.ini")
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
+config = configparser.ConfigParser()
+config.read("config.ini")
+
 default_config = config["DEFAULT"]
 if default_config["DatabaseType"] == "MySQL":
     cnx = mysql.connector.connect(
@@ -61,7 +62,7 @@ def device_registration():
         authorization_token = secrets.token_urlsafe(32)
         cursor.execute(
             queries.register_device(
-                device_serial, device_location, description, authorization_token,device_model
+                device_serial, device_location, description, authorization_token, device_model
             )
         )
         cnx.commit()
@@ -75,8 +76,8 @@ def device_registration():
 def user_registration():
     remote_addr = request.environ.get("HTTP_X_REAL_IP", request.remote_addr)
     if (
-        ipaddress.ip_address(remote_addr) in authorized_networks
-        or remote_addr == "127.0.0.1"
+            ipaddress.ip_address(remote_addr) in authorized_networks
+            or remote_addr == "127.0.0.1"
     ):
         info = request.json
         user_name = info["user_name"]
