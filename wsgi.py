@@ -1,4 +1,4 @@
-from msg_receiver import app
+from msg_receiver import app as application
 
 if __name__ == "__main__":
-    app.run()
+    application.run()
