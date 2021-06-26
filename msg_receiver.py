@@ -1,17 +1,19 @@
+from flask import Flask
+app = Flask(__name__)
 import configparser
 import ipaddress
 import secrets
 import sqlite3
 
 import mysql.connector
-from flask import Flask
+
 from flask import jsonify
 from flask import request
 from flask_bcrypt import Bcrypt
 
 from queries import Queries
 
-app = Flask(__name__)
+
 bcrypt = Bcrypt(app)
 config = configparser.ConfigParser()
 config.read("config.ini")
