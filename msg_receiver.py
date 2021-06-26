@@ -1,5 +1,5 @@
 from flask import Flask
-app = Flask(__name__)
+
 import configparser
 import ipaddress
 import secrets
@@ -13,11 +13,10 @@ from flask_bcrypt import Bcrypt
 
 from queries import Queries
 
-
+app = Flask(__name__)
 bcrypt = Bcrypt(app)
 config = configparser.ConfigParser()
 config.read("config.ini")
-
 default_config = config["DEFAULT"]
 if default_config["DatabaseType"] == "MySQL":
     cnx = mysql.connector.connect(
