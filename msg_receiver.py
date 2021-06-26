@@ -26,7 +26,7 @@ if default_config["DatabaseType"] == "MySQL":
         database=default_config["DatabaseName"],
     )
 elif default_config["DatabaseType"] == "SQLite":
-    cnx = sqlite3.connect(default_config["DatabaseName"] + ".db")
+    cnx = sqlite3.connect(default_config["DatabaseName"] + ".db", check_same_thread=False)
 
 else:
     raise ValueError
@@ -49,6 +49,7 @@ def hello():
 @app.route("/api/device_registration", methods=["POST"])
 def device_registration():
     info = request.json
+    print(request)
     user_name = info["user_name"]
     password = info["password"]
     cursor.execute(queries.get_user_password(user_name))
@@ -57,7 +58,7 @@ def device_registration():
     print(user_info)
     if user_info is None:
         return jsonify("User not found"), 404
-    if bcrypt.check_password_hash(password, user_info[0]):
+    if bcrypt.check_password_hash(user_info[0],password):
         device_serial = info["device_serial"]
         device_location = info["device_location"]
         description = info["description"]

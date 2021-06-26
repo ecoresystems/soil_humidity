@@ -5,7 +5,9 @@ import getpass
 
 
 def main():
-    url = "http://kyushu-aws.ecoresystems.cn/api/register_device"
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    url = config['DEFAULT']['RegistrationEndPoint']
     parser = argparse.ArgumentParser()
     parser.add_argument("device_location")
     parser.add_argument("description")
@@ -23,8 +25,15 @@ def main():
         "device_serial": device_serial,
         "device_model": device_model,
     }
-    response = requests.post(url, data=request_data)
-    print(response)
+    response = requests.post(url, json=request_data)
+    authorization_token = response.json()['authorization_token']
+    config['DEFAULT']['DeviceLocation'] = device_location
+    config['DEFAULT']['Description'] = description
+    config['DEFAULT']['DeviceSerial'] = device_serial
+    config['DEFAULT']['DeviceModel'] = device_model
+    config['DEFAULT']['AuthorizationToken'] = authorization_token
+    with open('config.ini', 'w') as configfile:
+        config.write(configfile)
 
 
 def get_device_info():
