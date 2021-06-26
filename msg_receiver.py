@@ -1,12 +1,10 @@
-from flask import Flask
-
 import configparser
 import ipaddress
 import secrets
 import sqlite3
 
 import mysql.connector
-
+from flask import Flask
 from flask import jsonify
 from flask import request
 from flask_bcrypt import Bcrypt
@@ -58,7 +56,7 @@ def device_registration():
     print(user_info)
     if user_info is None:
         return jsonify("User not found"), 404
-    if bcrypt.check_password_hash(user_info[0],password):
+    if bcrypt.check_password_hash(user_info[0], password):
         device_serial = info["device_serial"]
         device_location = info["device_location"]
         description = info["description"]
@@ -95,7 +93,7 @@ def user_registration():
         return jsonify("Request from Unauthorized Network"), 400
 
 
-@app.route("/api/device_status_update")
+@app.route("/api/device_status_update", methods=['POST'])
 def device_status_update():
     info = request.json
     device_serial = info["device_serial"]
