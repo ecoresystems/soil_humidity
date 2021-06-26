@@ -24,5 +24,6 @@ def send_update():
     response = requests.post(url, json=request_data)
     print(response.json())
 
+
 if __name__ == "__main__":
     send_update()

@@ -37,12 +37,10 @@ def main():
 
 
 def get_device_info():
-    # with open("/proc/cpuinfo", "r") as sys_info_file:
-    #     sys_info = sys_info_file.readlines()
-    #     device_serial = sys_info[-2].split(": ")[1].strip()
-    #     device_model = sys_info[-1].split(": ")[1].strip()
-    device_serial = "0x00001222"
-    device_model = "Test_model"
+    with open("/proc/cpuinfo", "r") as sys_info_file:
+        sys_info = sys_info_file.readlines()
+        device_serial = sys_info[-2].split(": ")[1].strip()
+        device_model = sys_info[-1].split(": ")[1].strip()
     return device_serial, device_model
 
 
