@@ -40,18 +40,18 @@ class Queries:
 
     @staticmethod
     def log_status(device_serial: str, metric_name: str, metric_value: float):
-        return f"INSERT INTO DEVICE_STATUS (DEVICE_SERIAL,METRIC_NAME,METRIC_VALUE,LOGGING_TIME) VALUES ({device_serial},{metric_name},{metric_value},{datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+        return f"INSERT INTO DEVICE_STATUS (DEVICE_SERIAL,METRIC_NAME,METRIC_VALUE,LOGGING_TIME) VALUES ('{device_serial}','{metric_name}',{metric_value},'{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}')"
 
     @staticmethod
     def register_user(user_name: str, pw_hash: str):
         return (
-            f"INSERT INTO AUTHORIZED_USERS (USER_NAME,PASSWORD,REGISTRATION_TIME) VALUES ({user_name},{pw_hash},"
-            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+            f"INSERT INTO AUTHORIZED_USERS (USER_NAME,PASSWORD,REGISTRATION_TIME) VALUES ('{user_name}','{pw_hash}',"
+            f"'{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}')"
         )
 
     @staticmethod
     def get_user_password(user_name: str):
-        return f"SELECT PASSWORD FROM AUTHORIZED_USERS WHERE USER_NAME = {user_name}"
+        return f"SELECT PASSWORD FROM AUTHORIZED_USERS WHERE USER_NAME = '{user_name}'"
 
     @staticmethod
     def register_device(
@@ -62,9 +62,13 @@ class Queries:
     ):
         return (
             f"INSERT INTO DEVICES (DEVICE_SERIAL,DEVICE_LOCATION,DESCRIPTION,AUTHORIZATION_TOKEN,REGISTRATION_TIME)"
-            f"VALUES ({device_serial},{device_location},{description},{authorization_token},{datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+            f"VALUES ('{device_serial}','{device_location}','{description}','{authorization_token}','{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}')"
         )
 
     @staticmethod
     def get_device_authorization_token(device_serial: str):
-        return f"SELECT AUTHORIZATION_TOKEN FROM DEVICES WHERE DEVICE_SERIAL = {device_serial}"
+        return f"SELECT AUTHORIZATION_TOKEN FROM DEVICES WHERE DEVICE_SERIAL = '{device_serial}'"
+
+    @staticmethod
+    def get_latest_status():
+        return f"select * from DEVICE_STATUS where STATUS_ID in (select STATUS_ID from DEVICE_STATUS group by DEVICE_SERIAL ORDER BY LOGGING_TIME DESC LIMIT 1)"

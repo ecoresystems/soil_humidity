@@ -57,10 +57,11 @@ def device_registration():
         device_serial = info["device_serial"]
         device_location = info["device_location"]
         description = info["description"]
+        device_model = info["device_model"]
         authorization_token = secrets.token_urlsafe(32)
         cursor.execute(
             queries.register_device(
-                device_serial, device_location, description, authorization_token
+                device_serial, device_location, description, authorization_token,device_model
             )
         )
         cnx.commit()
@@ -80,7 +81,8 @@ def user_registration():
         info = request.json
         user_name = info["user_name"]
         password = info["password"]
-        pw_hash = bcrypt.generate_password_hash(password)
+        pw_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+        print(queries.register_user(user_name, pw_hash))
         cursor.execute(queries.register_user(user_name, pw_hash))
         cnx.commit()
         return jsonify(f"Created user {user_name}")
