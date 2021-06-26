@@ -104,7 +104,8 @@ def device_status_update():
         return jsonify("Device not found"), 404
     elif authorization_token == device_info[0]:
         metric_name = info["metric_name"]
-        metric_value = eval(info["metric_value"])
+        print(info["metric_value"])
+        metric_value = info["metric_value"]
         cursor.execute(
             queries.log_status(device_serial, metric_name, float(metric_value))
         )
