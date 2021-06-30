@@ -56,11 +56,11 @@ class Queries:
 
     @staticmethod
     def register_device(
-        device_serial: str,
-        device_location: str,
-        description: str,
-        authorization_token: str,
-        device_model:str
+            device_serial: str,
+            device_location: str,
+            description: str,
+            authorization_token: str,
+            device_model: str
     ):
         return (
             f"INSERT INTO DEVICES (DEVICE_SERIAL,DEVICE_LOCATION,DESCRIPTION,AUTHORIZATION_TOKEN,REGISTRATION_TIME,DEVICE_MODEL)"
@@ -74,4 +74,12 @@ class Queries:
 
     @staticmethod
     def get_latest_status():
-        return f"select * from DEVICE_STATUS where STATUS_ID in (select STATUS_ID from DEVICE_STATUS group by DEVICE_SERIAL ORDER BY LOGGING_TIME DESC LIMIT 1)"
+        return f"select * from DEVICE_STATUS group by DEVICE_SERIAL ORDER BY LOGGING_TIME DESC LIMIT 1"
+
+    @staticmethod
+    def get_device_history(device_serial: str):
+        return f"select * from DEVICE_STATUS where DEVICE_SERIAL = \'{device_serial}\'"
+
+    @staticmethod
+    def get_device_info(device_serial: str):
+        return f"select * from DEVICES where DEVICE_SERIAL = \'{device_serial}\'"

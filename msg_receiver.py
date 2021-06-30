@@ -4,7 +4,7 @@ import secrets
 import sqlite3
 
 import mysql.connector
-from flask import Flask
+from flask import Flask, render_template
 from flask import jsonify
 from flask import request
 from flask_bcrypt import Bcrypt
@@ -39,9 +39,49 @@ cursor.execute(queries.create_devices_table())
 cursor.execute(queries.create_device_status_table())
 
 
-@app.route("/")
-def hello():
-    return "<h1 style='color:blue'>Hello There!</h1>"
+@app.route('/')
+@app.route('/index')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/api/get_latest_status', methods=['GET'])
+def get_latest_status():
+    result_list = []
+    for status in cursor.fetchall():
+        # print(status[1])
+        cursor.execute(queries.get_device_info(status[1]))
+        # print(cursor.fetchone())
+        device = cursor.fetchone()[1]
+        print(device)
+        result_list.append(
+            {
+                "device_serial": device[1],
+                "device_location": device[2],
+                "description": device[3],
+                "device_model": device[6],
+                "metric_name": status[2],
+                "metric_value": status[3],
+                "logging_time": status[4]
+            })
+    return jsonify(latest_status=result_list)
+
+
+@app.route('/api/get_device_log', methods=['GET'])
+def get_device_log():
+    result_list = []
+    device_serial = request.args.get('device_serial')
+    cursor.execute(queries.get_device_history(device_serial))
+    for status in cursor.fetchall():
+        result_list.append(
+            {
+                "device_serial": status[1],
+                "metric_name": status[2],
+                "metric_value": status[3],
+                "logging_time": status[4]
+            }
+        )
+    return jsonify(device_log=result_list)
 
 
 @app.route("/api/device_registration", methods=["POST"])
