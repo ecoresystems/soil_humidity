@@ -48,11 +48,12 @@ def index():
 @app.route('/api/get_latest_status', methods=['GET'])
 def get_latest_status():
     result_list = []
+    cursor.execute(queries.get_latest_status())
     for status in cursor.fetchall():
-        # print(status[1])
+        print(status[1])
         cursor.execute(queries.get_device_info(status[1]))
         # print(cursor.fetchone())
-        device = cursor.fetchone()[1]
+        device = cursor.fetchone()
         print(device)
         result_list.append(
             {
@@ -64,6 +65,7 @@ def get_latest_status():
                 "metric_value": status[3],
                 "logging_time": status[4]
             })
+    print(result_list)
     return jsonify(latest_status=result_list)
 
 

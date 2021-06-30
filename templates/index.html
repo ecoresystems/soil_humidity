@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!--    Load Required CSS-->
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+    <link href="../static/css/site.css" rel="stylesheet" th:href="@{/css/site.css}"/>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://www.jsdelivr.com/package/npm/pdfjs-dist/build/pdf.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" name="viewport">
+    <!--    Load Element UI Components-->
+    <!-- import CSS -->
+    <link href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" rel="stylesheet">
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/colorthief@2.0.2/src/color-thief.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-aplayer"></script>
+
+    <meta charset="UTF-8">
+    <title>Material Management</title>
+</head>
+<body>
+
+<div id="app">
+        <el-dialog :visible.sync="open_details">
+            <el-table
+                    stripe
+                    :data="device_data"
+                    style="width: 100%"
+                    height="500"
+            >
+                <el-table-column
+                        prop="device_serial"
+                        label="SN"
+                        width="180">
+                </el-table-column>
+                </el-table-column>
+                <el-table-column
+                        prop="metric_name"
+                        label="Metric">
+                </el-table-column>
+                <el-table-column
+                        prop="metric_value"
+                        label="Value">
+                </el-table-column>
+                <el-table-column
+                        prop="logging_time"
+                        label="Logging Time">
+                </el-table-column>
+            </el-table>
+        </el-dialog>
+    <div class="container mt-3 mb-5">
+
+        <el-table
+                :data="table_data"
+                style="width: 100%"
+                @row-click="handleClick"
+        >
+            <el-table-column
+                    prop="device_serial"
+                    label="SN"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="device_location"
+                    label="Location"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="device_model"
+                    label="Model"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="metric_name"
+                    label="Metric">
+            </el-table-column>
+            <el-table-column
+                    prop="metric_value"
+                    label="Value">
+            </el-table-column>
+            <el-table-column
+                    prop="logging_time"
+                    label="Logging Time">
+            </el-table-column>
+        </el-table>
+    </div>
+
+
+</div>
+
+<style>
+    .el-row {
+        margin-bottom: 20px;
+    }
+
+</style>
+
+<script>
+    Vue.config.devtools = true;
+    Vue.component('aplayer', VueAPlayer);
+    let vm = new Vue({
+        el: '#app',
+        data: {
+            table_data: '',
+            open_details: false,
+            device_data:''
+        },
+
+
+        created: function () {
+
+        },
+        mounted: function () {
+            this.inIt();
+        },
+
+        methods: {
+            handleClick: function (value) {
+                let self = this;
+                axios({
+                    url: '/api/get_device_log',
+                    method: 'GET',
+                    params: {
+                        device_serial: value.device_serial,
+                    }
+                }).then((response) => {
+                    self.device_data = response.data.device_log;
+                    console.log(self.device_data);
+                    self.open_details = true;
+                })
+            },
+            inIt: function () {
+                this.load_latest_status(true);
+            },
+            load_latest_status: function () {
+                let self = this;
+                axios({
+                    url: '/api/get_latest_status',
+                    method: 'GET',
+                }).then((response) => {
+                    self.table_data = response.data.latest_status;
+                })
+            },
+
+        },
+    })
+</script>
+<style scoped>
+    h1, h2 {
+        font-weight: normal;
+    }
+
+    .button-pill {
+        border-radius: 200px;
+    }
+
+    .button-primary, .button-primary-flat {
+        background-color: #1B9AF7;
+        border-color: #1B9AF7;
+        color: #FFF;
+    }
+
+    .button {
+        color: #FFF;
+        background-color: #1B9AF7;
+        border-color: #EEE;
+        font-size: 16px;
+        font-family: "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+        text-decoration: none;
+        text-align: center;
+        line-height: 40px;
+        height: 40px;
+        padding: 0 40px;
+        margin: 0;
+        display: inline-block;
+        appearance: none;
+        cursor: pointer;
+        border: none;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: .3s;
+        transition-duration: .3s;
+    }
+
+    .button-small {
+        font-size: 12px;
+        height: 30px;
+        line-height: 30px;
+        padding: 0 30px;
+    }
+
+    .loading {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background: black;
+        opacity: 0.8;
+    }
+
+    .progress {
+        width: 200px;
+        height: 200px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -100px;
+        margin-top: -100px;
+    }
+
+    .tips {
+        color: #409eff;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -100px;
+        margin-top: -150px;
+    }
+
+</style>
