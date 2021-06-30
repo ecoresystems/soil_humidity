@@ -78,7 +78,7 @@ class Queries:
 
     @staticmethod
     def get_device_history(device_serial: str):
-        return f"select * from DEVICE_STATUS where DEVICE_SERIAL = \'{device_serial}\'"
+        return f"select * from DEVICE_STATUS where DEVICE_SERIAL = \'{device_serial}\' ORDER BY LOGGING_TIME DESC"
 
     @staticmethod
     def get_device_info(device_serial: str):
