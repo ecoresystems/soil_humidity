@@ -139,10 +139,10 @@
 
         methods: {
             tableRowClassName({row, rowIndex}) {
-                console.log(row[rowIndex]);
-                if (row[rowIndex].metric_value <= 2) {
+                console.log(row[rowIndex.metric_value]);
+                if (row[rowIndex.metric_value] <= 2) {
                     return 'warning-row';
-                } else if (row[rowIndex].metric_value > 2) {
+                } else if (row[rowIndex.metric_value] > 2) {
                     return '.normal-row';
                 }
                 return '';
