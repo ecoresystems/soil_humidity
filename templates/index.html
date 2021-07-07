@@ -13,7 +13,6 @@
     </style>
     <link href="../static/css/site.css" rel="stylesheet" th:href="@{/css/site.css}"/>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="https://www.jsdelivr.com/package/npm/pdfjs-dist/build/pdf.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" name="viewport">
@@ -23,62 +22,25 @@
     <!-- import JavaScript -->
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/colorthief@2.0.2/src/color-thief.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue-aplayer"></script>
-
     <meta charset="UTF-8">
     <title>Material Management</title>
 </head>
 <body>
 
 <div id="app">
-        <el-dialog :visible.sync="open_details">
-            <el-table
-                    stripe
-                    :data="device_data"
-                    style="width: 100%"
-                    height="500"
-            >
-                <el-table-column
-                        prop="device_serial"
-                        label="SN"
-                        width="180">
-                </el-table-column>
-                </el-table-column>
-                <el-table-column
-                        prop="metric_name"
-                        label="Metric">
-                </el-table-column>
-                <el-table-column
-                        prop="metric_value"
-                        label="Value">
-                </el-table-column>
-                <el-table-column
-                        prop="logging_time"
-                        label="Logging Time">
-                </el-table-column>
-            </el-table>
-        </el-dialog>
-    <div class="container mt-3 mb-5">
-
+    <el-dialog :visible.sync="open_details">
         <el-table
-                :data="table_data"
+                stripe
+                :row-class-name="tableRowClassName"
+                :data="device_data"
                 style="width: 100%"
-                @row-click="handleClick"
+                height="500"
         >
             <el-table-column
                     prop="device_serial"
                     label="SN"
                     width="180">
             </el-table-column>
-            <el-table-column
-                    prop="device_location"
-                    label="Location"
-                    width="180">
-            </el-table-column>
-            <el-table-column
-                    prop="device_model"
-                    label="Model"
-                    width="180">
             </el-table-column>
             <el-table-column
                     prop="metric_name"
@@ -93,6 +55,50 @@
                     label="Logging Time">
             </el-table-column>
         </el-table>
+    </el-dialog>
+    <div class="container mt-3 mb-5">
+        <el-row>
+            Reference: No Medium - 0
+
+        </el-row>
+        <el-row>
+            <el-table
+                    stripe
+                    :row-class-name="tableRowClassName"
+                    :data="table_data"
+                    style="width: 100%"
+                    @row-click="handleClick"
+            >
+                <el-table-column
+                        prop="device_serial"
+                        label="SN"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="device_location"
+                        label="Location"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="device_model"
+                        label="Model"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="metric_name"
+                        label="Metric">
+                </el-table-column>
+                <el-table-column
+                        prop="metric_value"
+                        label="Value">
+                </el-table-column>
+                <el-table-column
+                        prop="logging_time"
+                        label="Logging Time">
+                </el-table-column>
+            </el-table>
+        </el-row>
+
     </div>
 
 
@@ -102,7 +108,13 @@
     .el-row {
         margin-bottom: 20px;
     }
+  .el-table .warning-row {
+    background: oldlace;
+  }
 
+  .el-table .normal-row {
+    background: #f0f9eb;
+  }
 </style>
 
 <script>
@@ -113,7 +125,7 @@
         data: {
             table_data: '',
             open_details: false,
-            device_data:''
+            device_data: ''
         },
 
 
@@ -125,6 +137,14 @@
         },
 
         methods: {
+            tableRowClassName({row, rowIndex}) {
+                if (row.metric_value <= 2) {
+                    return 'warning-row';
+                } else if (row.metric_value > 2) {
+                    return '.normal-row';
+                }
+                return '';
+            },
             handleClick: function (value) {
                 let self = this;
                 axios({
