@@ -59,7 +59,9 @@
     <div class="container mt-3 mb-5">
         <el-row>
             Reference: No Medium - 0
-
+        </el-row>
+        <el-row>
+            Reference: Water - 3.3
         </el-row>
         <el-row>
             <el-table
@@ -119,7 +121,6 @@
 
 <script>
     Vue.config.devtools = true;
-    Vue.component('aplayer', VueAPlayer);
     let vm = new Vue({
         el: '#app',
         data: {
@@ -138,6 +139,8 @@
 
         methods: {
             tableRowClassName({row, rowIndex}) {
+                console.log(row);
+                console.log(rowIndex);
                 if (row.metric_value <= 2) {
                     return 'warning-row';
                 } else if (row.metric_value > 2) {
