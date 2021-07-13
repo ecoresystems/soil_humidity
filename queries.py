@@ -73,8 +73,12 @@ class Queries:
         return f"SELECT AUTHORIZATION_TOKEN FROM DEVICES WHERE DEVICE_SERIAL = '{device_serial}'"
 
     @staticmethod
-    def get_latest_status():
-        return f"select * from DEVICE_STATUS group by DEVICE_SERIAL ORDER BY LOGGING_TIME DESC LIMIT 1"
+    def get_all_devices():
+        return "SELECT * FROM DEVICES"
+
+    @staticmethod
+    def get_latest_status(device_serial: str, metric_name: str):
+        return f"select * from DEVICE_STATUS WHERE DEVICE_SERIAL = \'{device_serial}\' AND METRIC_NAME = \'{metric_name}\' ORDER BY LOGGING_TIME DESC LIMIT 1"
 
     @staticmethod
     def get_device_history(device_serial: str):
@@ -83,3 +87,7 @@ class Queries:
     @staticmethod
     def get_device_info(device_serial: str):
         return f"select * from DEVICES where DEVICE_SERIAL = \'{device_serial}\'"
+
+    @staticmethod
+    def get_unique_metrics_for_device(device_serial: str):
+        return f"select distinct METRIC_NAME from DEVICE_STATUS where DEVICE_SERIAL = \'{device_serial}\'"

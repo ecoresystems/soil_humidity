@@ -47,25 +47,27 @@ def index():
 
 @app.route('/api/get_latest_status', methods=['GET'])
 def get_latest_status():
+    # start of test section
     result_list = []
-    cursor.execute(queries.get_latest_status())
-    for status in cursor.fetchall():
-        print(status[1])
-        cursor.execute(queries.get_device_info(status[1]))
-        # print(cursor.fetchone())
-        device = cursor.fetchone()
-        print(device)
-        result_list.append(
-            {
-                "device_serial": device[1],
-                "device_location": device[2],
-                "description": device[3],
-                "device_model": device[6],
-                "metric_name": status[2],
-                "metric_value": status[3],
-                "logging_time": status[4]
-            })
-    print(result_list)
+    cursor.execute(queries.get_all_devices())
+    for device in cursor.fetchall():
+        device_serial = device[1]
+        cursor.execute(queries.get_unique_metrics_for_device(device_serial))
+        for metric in cursor.fetchall():
+            metric_name = metric[0]
+            cursor.execute(queries.get_latest_status(device_serial,metric_name))
+            for status in cursor.fetchone():
+                result_list.append(
+                    {
+                        "device_serial": device_serial,
+                        "device_location": device[2],
+                        "description": device[3],
+                        "device_model": device[6],
+                        "metric_name": status[2],
+                        "metric_value": status[3],
+                        "logging_time": status[4]
+                    })
+    # end of test section
     return jsonify(latest_status=result_list)
 
 
