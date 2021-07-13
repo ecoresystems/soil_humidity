@@ -56,17 +56,18 @@ def get_latest_status():
         for metric in cursor.fetchall():
             metric_name = metric[0]
             cursor.execute(queries.get_latest_status(device_serial,metric_name))
-            for status in cursor.fetchone():
-                result_list.append(
-                    {
-                        "device_serial": device_serial,
-                        "device_location": device[2],
-                        "description": device[3],
-                        "device_model": device[6],
-                        "metric_name": status[2],
-                        "metric_value": status[3],
-                        "logging_time": status[4]
-                    })
+            status = cursor.fetchone()
+            print(status)
+            result_list.append(
+                {
+                    "device_serial": device_serial,
+                    "device_location": device[2],
+                    "description": device[3],
+                    "device_model": device[6],
+                    "metric_name": status[2],
+                    "metric_value": status[3],
+                    "logging_time": status[4]
+                })
     # end of test section
     return jsonify(latest_status=result_list)
 
@@ -75,7 +76,8 @@ def get_latest_status():
 def get_device_log():
     result_list = []
     device_serial = request.args.get('device_serial')
-    cursor.execute(queries.get_device_history(device_serial))
+    metric_name = request.args.get('metric_name')
+    cursor.execute(queries.get_device_history(device_serial,metric_name))
     for status in cursor.fetchall():
         result_list.append(
             {

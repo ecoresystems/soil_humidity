@@ -154,6 +154,8 @@
                     method: 'GET',
                     params: {
                         device_serial: value.device_serial,
+                        metric_name: value.metric_name,
+                        metric_name: value.metric_name,
                     }
                 }).then((response) => {
                     self.device_data = response.data.device_log;

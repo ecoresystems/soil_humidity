@@ -81,8 +81,8 @@ class Queries:
         return f"select * from DEVICE_STATUS WHERE DEVICE_SERIAL = \'{device_serial}\' AND METRIC_NAME = \'{metric_name}\' ORDER BY LOGGING_TIME DESC LIMIT 1"
 
     @staticmethod
-    def get_device_history(device_serial: str):
-        return f"select * from DEVICE_STATUS where DEVICE_SERIAL = \'{device_serial}\' ORDER BY LOGGING_TIME DESC"
+    def get_device_history(device_serial: str, metric_name: str):
+        return f"select * from DEVICE_STATUS where DEVICE_SERIAL = \'{device_serial}\' AND METRIC_NAME = \'{metric_name}\' ORDER BY LOGGING_TIME DESC"
 
     @staticmethod
     def get_device_info(device_serial: str):
