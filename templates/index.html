@@ -16,6 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" name="viewport">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <!--    Load Element UI Components-->
     <!-- import CSS -->
     <link href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" rel="stylesheet">
@@ -28,10 +29,13 @@
 <body>
 
 <div id="app">
-    <el-dialog :visible.sync="open_details">
+    <el-dialog
+            :title="dialogTitle"
+            width="80%"
+            :visible.sync="open_details">
+        <div id="chart_div"></div>
         <el-table
                 stripe
-                :row-class-name="tableRowClassName"
                 :data="device_data"
                 style="width: 100%"
                 height="500"
@@ -56,67 +60,92 @@
             </el-table-column>
         </el-table>
     </el-dialog>
-    <div class="container mt-3 mb-5">
-        <el-row>
-            Reference: No Medium - 0
-        </el-row>
-        <el-row>
-            Reference: Water - 3.3
-        </el-row>
-        <el-row>
-            <el-table
-                    stripe
-                    :row-class-name="tableRowClassName"
-                    :data="table_data"
-                    style="width: 100%"
-                    @row-click="handleClick"
-            >
-                <el-table-column
-                        prop="device_serial"
-                        label="SN"
-                        width="180">
-                </el-table-column>
-                <el-table-column
-                        prop="device_location"
-                        label="Location"
-                        width="180">
-                </el-table-column>
-                <el-table-column
-                        prop="device_model"
-                        label="Model"
-                        width="180">
-                </el-table-column>
-                <el-table-column
-                        prop="metric_name"
-                        label="Metric">
-                </el-table-column>
-                <el-table-column
-                        prop="metric_value"
-                        label="Value">
-                </el-table-column>
-                <el-table-column
-                        prop="logging_time"
-                        label="Logging Time">
-                </el-table-column>
-            </el-table>
-        </el-row>
-
-    </div>
-
-
+    <el-container>
+        <el-main>
+            <el-row v-for="error_item in error_list">
+                <el-alert
+                        title="Critical Alert"
+                        type="error"
+                        :description="getErrorDescriptionText(error_item)"
+                        show-icon>
+                </el-alert>
+            </el-row>
+            <el-row v-for="warning_item in warning_list">
+                <el-alert
+                        title="Warning"
+                        type="warning"
+                        description="getWarningDescriptionText(warning_item)"
+                        show-icon>
+                </el-alert>
+            </el-row>
+            <el-row v-if="warning_list.length===0 && error_list.length===0">
+                <el-alert
+                        title="Normal"
+                        type="success"
+                        description="All parameters are within normal range"
+                        show-icon>
+                </el-alert>
+            </el-row>
+            <el-row>
+                <el-table
+                        :row-class-name="tableRowClassName"
+                        :data="table_data"
+                        style="width: 100%"
+                        @row-click="handleClick"
+                >
+                    <el-table-column
+                            prop="device_serial"
+                            label="SN"
+                            width="180">
+                    </el-table-column>
+                    <el-table-column
+                            prop="device_location"
+                            label="Location"
+                            width="180">
+                    </el-table-column>
+                    <el-table-column
+                            prop="device_model"
+                            label="Model"
+                            width="240">
+                    </el-table-column>
+                    <el-table-column
+                            prop="metric_name"
+                            label="Metric">
+                    </el-table-column>
+                    <el-table-column
+                            prop="metric_value"
+                            label="Value">
+                    </el-table-column>
+                    <el-table-column
+                            prop="logging_time"
+                            label="Logging Time">
+                    </el-table-column>
+                </el-table>
+            </el-row>
+        </el-main>
+    </el-container>
 </div>
 
 <style>
+    .el-header {
+        margin-top: 20px;
+    }
+
     .el-row {
         margin-bottom: 20px;
     }
-  .el-table .warning-row {
-    background: oldlace;
-  }
 
-  .el-table .normal-row {
-    background: #f0f9eb;
-  }
+    .el-table .warning-row {
+        background: #F9E7CE;
+    }
+
+    .el-table .normal-row {
+        background: #DAF2CE;
+    }
+
+    .el-table .error-row {
+        background: #FBDBDB;
+    }
 </style>
 
 <script>
@@ -126,7 +155,11 @@
         data: {
             table_data: '',
             open_details: false,
-            device_data: ''
+            device_data: '',
+            warning_list: [],
+            error_list: [],
+            normal_list: [],
+            dialogTitle: '',
         },
 
 
@@ -138,14 +171,44 @@
         },
 
         methods: {
-            tableRowClassName({row}) {
-                console.log(row.metric_value);
-                if (row.metric_value <= 2) {
-                    return 'warning-row';
-                } else if (row.metric_value > 2) {
-                    return '.normal-row';
+            plotLineChart: function () {
+                google.charts.load('current', {packages: ['corechart', 'line']});
+                google.setOnLoadCallback(this.drawBackgroundColor);
+            },
+            drawBackgroundColor: function () {
+                let self = this;
+                var data = new google.visualization.DataTable();
+                data.addColumn('datetime', 'time');
+                data.addColumn('number', 'Average');
+                data.addColumn('number', self.device_data[0].metric_name);
+                let avg;
+                for (let i = 0; i < self.table_data.length; i++) {
+                    if (self.device_data[0].device_serial === self.table_data[i].device_serial && self.device_data[0].metric_name === self.table_data[i].metric_name) {
+                        avg = self.table_data[i].avg_value;
+                    }
                 }
-                return '';
+                for (let i = 0; i < self.device_data.length; i++) {
+                    data.addRows([[new Date(self.device_data[i].logging_time), Number(avg), Number(self.device_data[i].metric_value)]]);
+                }
+                var options = {
+                    hAxis: {
+                        title: 'Time'
+                    },
+                    vAxis: {
+                        title: 'Value'
+                    },
+                    backgroundColor: '#ffffff'
+                };
+                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                chart.draw(data, options);
+            },
+            getErrorDescriptionText: function (item) {
+                return "Critical value detected on site: " + item.device_location + "; Metric/Channel: " + item.metric_name +
+                    "; Reference: Value/Average value: " + item.metric_value.toFixed(4) + "/" + item.avg_value.toFixed(4);
+            },
+            getWarningDescriptionText: function (item) {
+                return "Low value detected on site: " + item.device_location + "; Metric/Channel: " + item.metric_name +
+                    "; Reference: Value/Average value: " + item.metric_value.toFixed(4) + "/" + item.avg_value.toFixed(4);
             },
             handleClick: function (value) {
                 let self = this;
@@ -155,13 +218,22 @@
                     params: {
                         device_serial: value.device_serial,
                         metric_name: value.metric_name,
-                        metric_name: value.metric_name,
                     }
                 }).then((response) => {
                     self.device_data = response.data.device_log;
-                    console.log(self.device_data);
+                    self.dialogTitle = "History data for device on: " + value.device_location + "@" + value.metric_name;
                     self.open_details = true;
+                    self.plotLineChart();
                 })
+            },
+            tableRowClassName({row}) {
+                console.log(row.metric_value);
+                if (row.metric_value <= 0.5 * row.avg_value) {
+                    return 'error-row';
+                } else if (row.metric_value <= row.avg_value) {
+                    return '.warning-row';
+                }
+                return 'normal-row';
             },
             inIt: function () {
                 this.load_latest_status(true);
@@ -173,86 +245,18 @@
                     method: 'GET',
                 }).then((response) => {
                     self.table_data = response.data.latest_status;
+                    for (let i = 0; i < response.data.latest_status.length; i++) {
+                        if (response.data.latest_status[i].metric_value < 0.5 * response.data.latest_status[i].avg_value) {
+                            self.error_list.push(response.data.latest_status[i]);
+                        } else if (response.data.latest_status[i].metric_value < response.data.latest_status[i].avg_value) {
+                            self.warning_list.push(response.data.latest_status[i]);
+                        } else {
+                            self.normal_list.push(response.data.latest_status[i]);
+                        }
+                    }
                 })
             },
 
         },
     })
 </script>
-<style scoped>
-    h1, h2 {
-        font-weight: normal;
-    }
-
-    .button-pill {
-        border-radius: 200px;
-    }
-
-    .button-primary, .button-primary-flat {
-        background-color: #1B9AF7;
-        border-color: #1B9AF7;
-        color: #FFF;
-    }
-
-    .button {
-        color: #FFF;
-        background-color: #1B9AF7;
-        border-color: #EEE;
-        font-size: 16px;
-        font-family: "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-        text-decoration: none;
-        text-align: center;
-        line-height: 40px;
-        height: 40px;
-        padding: 0 40px;
-        margin: 0;
-        display: inline-block;
-        appearance: none;
-        cursor: pointer;
-        border: none;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: .3s;
-        transition-duration: .3s;
-    }
-
-    .button-small {
-        font-size: 12px;
-        height: 30px;
-        line-height: 30px;
-        padding: 0 30px;
-    }
-
-    .loading {
-        position: absolute;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        background: black;
-        opacity: 0.8;
-    }
-
-    .progress {
-        width: 200px;
-        height: 200px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-left: -100px;
-        margin-top: -100px;
-    }
-
-    .tips {
-        color: #409eff;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-left: -100px;
-        margin-top: -150px;
-    }
-
-</style>

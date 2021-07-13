@@ -57,7 +57,8 @@ def get_latest_status():
             metric_name = metric[0]
             cursor.execute(queries.get_latest_status(device_serial,metric_name))
             status = cursor.fetchone()
-            print(status)
+            cursor.execute(queries.get_average_value(device_serial,metric_name))
+            avg_value = cursor.fetchone()[0]
             result_list.append(
                 {
                     "device_serial": device_serial,
@@ -66,7 +67,8 @@ def get_latest_status():
                     "device_model": device[6],
                     "metric_name": status[2],
                     "metric_value": status[3],
-                    "logging_time": status[4]
+                    "logging_time": status[4],
+                    "avg_value": avg_value
                 })
     # end of test section
     return jsonify(latest_status=result_list)
