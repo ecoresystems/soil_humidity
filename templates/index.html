@@ -160,17 +160,24 @@
             error_list: [],
             normal_list: [],
             dialogTitle: '',
+            timer: '',
         },
 
 
         created: function () {
-
+            this.timer = setInterval(this.load_latest_status, 300000);
         },
         mounted: function () {
             this.inIt();
         },
+        beforeDestroy: function () {
+            this.cancelAutoUpdate();
+        },
 
         methods: {
+            cancelAutoUpdate() {
+                clearInterval(this.timer);
+            },
             plotLineChart: function () {
                 google.charts.load('current', {packages: ['corechart', 'line']});
                 google.setOnLoadCallback(this.drawBackgroundColor);
@@ -236,15 +243,19 @@
                 return 'normal-row';
             },
             inIt: function () {
-                this.load_latest_status(true);
+                this.load_latest_status();
             },
             load_latest_status: function () {
+                console.log("reloaded");
                 let self = this;
                 axios({
                     url: '/api/get_latest_status',
                     method: 'GET',
                 }).then((response) => {
                     self.table_data = response.data.latest_status;
+                    self.error_list = [];
+                    self.warning_list = [];
+                    self.warning_list = [];
                     for (let i = 0; i < response.data.latest_status.length; i++) {
                         if (response.data.latest_status[i].metric_value < 0.5 * response.data.latest_status[i].avg_value) {
                             self.error_list.push(response.data.latest_status[i]);
