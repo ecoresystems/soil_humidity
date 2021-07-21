@@ -24,7 +24,7 @@
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/colorthief@2.0.2/src/color-thief.js"></script>
     <meta charset="UTF-8">
-    <title>Material Management</title>
+    <title>Plants Management</title>
 </head>
 <body>
 
@@ -63,7 +63,7 @@
     <el-container>
         <el-main>
             <el-row>
-                <el-carousel indicator-position="outside" :interval="10000" height="300px">
+                <el-carousel indicator-position="inside" :interval="10000" height="300px">
                     <el-carousel-item :label="item.description" v-for="item,index in image_data" :key="index" >
                         <el-image
                                 :src="'data:image/jpeg;base64,'+item.base64_str"
