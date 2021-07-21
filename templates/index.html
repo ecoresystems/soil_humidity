@@ -62,6 +62,16 @@
     </el-dialog>
     <el-container>
         <el-main>
+            <el-row>
+                <el-carousel indicator-position="outside" :interval="10000" height="300px">
+                    <el-carousel-item :label="item.description" v-for="item,index in image_data" :key="index" >
+                        <el-image
+                                :src="'data:image/jpeg;base64,'+item.base64_str"
+                                :fit="'scale-down'">
+                        </el-image>
+                    </el-carousel-item>
+                </el-carousel>
+            </el-row>
             <el-row v-for="error_item in error_list">
                 <el-alert
                         title="Critical Alert"
@@ -162,6 +172,7 @@
             dialogTitle: '',
             timer: '',
             critical_threshold: 0.5,
+            image_data: []
         },
 
 
@@ -178,6 +189,16 @@
         },
 
         methods: {
+            getAllImages() {
+                let self = this;
+                axios({
+                    url: '/api/get_images',
+                    method: 'GET',
+                }).then((response) => {
+                    self.image_data = response.data.image_data;
+                    console.log(self.image_data);
+                })
+            },
             cancelAutoUpdate() {
                 clearInterval(this.timer);
             },
@@ -266,6 +287,7 @@
                             self.normal_list.push(response.data.latest_status[i]);
                         }
                     }
+                    this.getAllImages();
                 })
             },
 

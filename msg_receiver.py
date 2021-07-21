@@ -37,6 +37,7 @@ queries = Queries()
 cursor.execute(queries.create_authorized_users_table())
 cursor.execute(queries.create_devices_table())
 cursor.execute(queries.create_device_status_table())
+cursor.execute(queries.create_image_table())
 
 
 @app.route('/')
@@ -55,9 +56,9 @@ def get_latest_status():
         cursor.execute(queries.get_unique_metrics_for_device(device_serial))
         for metric in cursor.fetchall():
             metric_name = metric[0]
-            cursor.execute(queries.get_latest_status(device_serial,metric_name))
+            cursor.execute(queries.get_latest_status(device_serial, metric_name))
             status = cursor.fetchone()
-            cursor.execute(queries.get_average_value(device_serial,metric_name))
+            cursor.execute(queries.get_average_value(device_serial, metric_name))
             avg_value = cursor.fetchone()[0]
             result_list.append(
                 {
@@ -79,7 +80,7 @@ def get_device_log():
     result_list = []
     device_serial = request.args.get('device_serial')
     metric_name = request.args.get('metric_name')
-    cursor.execute(queries.get_device_history(device_serial,metric_name))
+    cursor.execute(queries.get_device_history(device_serial, metric_name))
     for status in cursor.fetchall():
         result_list.append(
             {
@@ -161,6 +162,30 @@ def device_status_update():
         return jsonify("Status logged"), 200
     else:
         return jsonify("Device serial and authorization token mismatch"), 400
+
+
+@app.route("/api/upload_image", methods=['POST'])
+def upload_image():
+    img_info = request.json
+    image_str = img_info["image_str"]
+    image_description = img_info['description']
+    md5_hash = img_info['md5_hash']
+    cursor.execute(queries.insert_image(image_str, image_description, md5_hash))
+    cnx.commit()
+    return jsonify("Image uploaded"), 200
+
+
+@app.route("/api/get_images", methods=['GET'])
+def get_all_images():
+    cursor.execute(queries.get_all_images())
+    image_list = []
+    for row in cursor.fetchall():
+        image_list.append({
+            "base64_str": row[0],
+            "description": row[1],
+            "md5_hash": row[2]}
+        )
+    return jsonify(image_data=image_list), 200
 
 
 if __name__ == "__main__":

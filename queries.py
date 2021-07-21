@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 
 class Queries:
@@ -38,6 +39,25 @@ class Queries:
             "METRIC_VALUE FLOAT NOT NULL,"
             "LOGGING_TIME TIMESTAMP )"
         )
+
+    @staticmethod
+    def create_image_table():
+        return (
+            "CREATE TABLE IF NOT EXISTS IMAGES("
+            "IMAGE_ID BIGINT AUTO_INCREMENT PRIMARY KEY ,"
+            "BASE64_DATA BLOB,"
+            "MD5_HASH VARCHAR(32) NOT NULL,"
+            "DESCRIPTION TEXT,"
+            "UNIQUE (MD5_HASH))"
+        )
+
+    @staticmethod
+    def insert_image(base64_str: str, description: str, md5_hash: str):
+        return f"INSERT OR IGNORE INTO IMAGES (BASE64_DATA, DESCRIPTION,MD5_HASH) VALUES ('{base64_str}','{description}','{md5_hash}')"
+
+    @staticmethod
+    def get_all_images():
+        return "SELECT BASE64_DATA,DESCRIPTION,MD5_HASH FROM IMAGES"
 
     @staticmethod
     def log_status(device_serial: str, metric_name: str, metric_value: float):
