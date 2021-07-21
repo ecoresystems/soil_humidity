@@ -71,7 +71,7 @@ def get_latest_status():
                     "avg_value": avg_value
                 })
     # end of test section
-    return jsonify(latest_status=result_list)
+    return jsonify(latest_status=result_list, critical_threshold=0.3)
 
 
 @app.route('/api/get_device_log', methods=['GET'])

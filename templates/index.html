@@ -161,6 +161,7 @@
             normal_list: [],
             dialogTitle: '',
             timer: '',
+            critical_threshold: 0.5,
         },
 
 
@@ -234,8 +235,7 @@
                 })
             },
             tableRowClassName({row}) {
-                console.log(row.metric_value);
-                if (row.metric_value <= 0.5 * row.avg_value) {
+                if (row.metric_value <= self.critical_threshold * row.avg_value) {
                     return 'error-row';
                 } else if (row.metric_value <= row.avg_value) {
                     return '.warning-row';
@@ -253,11 +253,12 @@
                     method: 'GET',
                 }).then((response) => {
                     self.table_data = response.data.latest_status;
+                    self.critical_threshold = response.data.critical_threshold;
                     self.error_list = [];
                     self.warning_list = [];
                     self.warning_list = [];
                     for (let i = 0; i < response.data.latest_status.length; i++) {
-                        if (response.data.latest_status[i].metric_value < 0.5 * response.data.latest_status[i].avg_value) {
+                        if (response.data.latest_status[i].metric_value < self.critical_threshold * response.data.latest_status[i].avg_value) {
                             self.error_list.push(response.data.latest_status[i]);
                         } else if (response.data.latest_status[i].metric_value < response.data.latest_status[i].avg_value) {
                             self.warning_list.push(response.data.latest_status[i]);
