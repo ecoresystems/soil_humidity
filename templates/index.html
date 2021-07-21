@@ -238,7 +238,7 @@
                 if (row.metric_value <= this.critical_threshold * row.avg_value) {
                     return 'error-row';
                 } else if (row.metric_value <= row.avg_value) {
-                    return '.warning-row';
+                    return 'warning-row';
                 }
                 return 'normal-row';
             },
@@ -246,7 +246,6 @@
                 this.load_latest_status();
             },
             load_latest_status: function () {
-                console.log("reloaded");
                 let self = this;
                 axios({
                     url: '/api/get_latest_status',
