@@ -166,7 +166,9 @@
 
 
         created: function () {
-            this.timer = setInterval(this.load_latest_status, 300000);
+            this.timer = setInterval(function () {
+                window.location.reload();
+            }, 300000);
         },
         mounted: function () {
             this.inIt();
