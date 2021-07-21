@@ -74,7 +74,7 @@
                 <el-alert
                         title="Warning"
                         type="warning"
-                        description="getWarningDescriptionText(warning_item)"
+                        :description="getWarningDescriptionText(warning_item)"
                         show-icon>
                 </el-alert>
             </el-row>
@@ -153,7 +153,7 @@
     let vm = new Vue({
         el: '#app',
         data: {
-            table_data: '',
+            table_data: [],
             open_details: false,
             device_data: '',
             warning_list: [],
@@ -235,7 +235,7 @@
                 })
             },
             tableRowClassName({row}) {
-                if (row.metric_value <= self.critical_threshold * row.avg_value) {
+                if (row.metric_value <= this.critical_threshold * row.avg_value) {
                     return 'error-row';
                 } else if (row.metric_value <= row.avg_value) {
                     return '.warning-row';
@@ -255,7 +255,6 @@
                     self.table_data = response.data.latest_status;
                     self.critical_threshold = response.data.critical_threshold;
                     self.error_list = [];
-                    self.warning_list = [];
                     self.warning_list = [];
                     for (let i = 0; i < response.data.latest_status.length; i++) {
                         if (response.data.latest_status[i].metric_value < self.critical_threshold * response.data.latest_status[i].avg_value) {
