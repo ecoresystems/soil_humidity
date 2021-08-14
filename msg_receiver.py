@@ -10,6 +10,10 @@ from flask import jsonify
 from flask import request
 from flask_bcrypt import Bcrypt
 
+from datetime import datetime
+
+
+
 from queries import Queries
 
 app = Flask(__name__)
@@ -53,7 +57,9 @@ def ito():
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect("ito.cc.kyushu-u.ac.jp", username='q70209a', pkey=key)
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("pjstat")
-    return render_template('ito.html', status=ssh_stdout.read().decode('utf-8'))
+    now = datetime.now()
+    dt_string = now.strftime("%Y/%m/%d %H:%M:%S")
+    return render_template('ito.html', status=ssh_stdout.read().decode('utf-8'), date_time_str=dt_string)
 
 
 @app.route('/api/get_latest_status', methods=['GET'])
