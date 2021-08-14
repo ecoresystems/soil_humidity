@@ -50,7 +50,7 @@ def index():
 def ito():
     ssh = paramiko.SSHClient()
     key = paramiko.RSAKey.from_private_key_file('/home/centos/.ssh/ito-key',password="ito-key")
-    ssh.connect("52.197.196.51", username='q70209a', pkey=key)
+    ssh.connect("ito.cc.kyushu-u.ac.jp", username='q70209a', pkey=key)
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("pjstat")
     return render_template('ito.html', status=ssh_stdout)
 
