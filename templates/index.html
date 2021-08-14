@@ -1,10 +1,298 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
+    <!--    Load Required CSS-->
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+    <link href="../static/css/site.css" rel="stylesheet" th:href="@{/css/site.css}"/>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" name="viewport">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!--    Load Element UI Components-->
+    <!-- import CSS -->
+    <link href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" rel="stylesheet">
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/colorthief@2.0.2/src/color-thief.js"></script>
     <meta charset="UTF-8">
-    <title>ITO Status</title>
+    <title>Plants Management</title>
 </head>
 <body>
 
-<div>{{  }}</div>
+<div id="app">
+    <el-dialog
+            :title="dialogTitle"
+            width="80%"
+            :visible.sync="open_details">
+        <div id="chart_div"></div>
+        <el-table
+                stripe
+                :data="device_data"
+                style="width: 100%"
+                height="500"
+        >
+            <el-table-column
+                    prop="device_serial"
+                    label="SN"
+                    width="180">
+            </el-table-column>
+            </el-table-column>
+            <el-table-column
+                    prop="metric_name"
+                    label="Metric">
+            </el-table-column>
+            <el-table-column
+                    prop="metric_value"
+                    label="Value">
+            </el-table-column>
+            <el-table-column
+                    prop="logging_time"
+                    label="Logging Time">
+            </el-table-column>
+        </el-table>
+    </el-dialog>
+    <el-container>
+        <el-main>
+            <el-row>
+                <el-col :span="8" :offset="8">
+                <el-carousel type="card" :interval="5000" height="300px">
+                    <el-carousel-item :label="item.description" v-for="item,index in image_data" :key="index" >
+                        <el-image
+                                :src="'data:image/jpeg;base64,'+item.base64_str"
+                                :fit="'scale-down'">
+                        </el-image>
+                    </el-carousel-item>
+                </el-carousel>
+                    </el-col>
+            </el-row>
+            <el-row v-for="error_item in error_list">
+                <el-alert
+                        title="Critical Alert"
+                        type="error"
+                        :description="getErrorDescriptionText(error_item)"
+                        show-icon>
+                </el-alert>
+            </el-row>
+            <el-row v-for="warning_item in warning_list">
+                <el-alert
+                        title="Warning"
+                        type="warning"
+                        :description="getWarningDescriptionText(warning_item)"
+                        show-icon>
+                </el-alert>
+            </el-row>
+            <el-row v-if="warning_list.length===0 && error_list.length===0">
+                <el-alert
+                        title="Normal"
+                        type="success"
+                        description="All parameters are within normal range"
+                        show-icon>
+                </el-alert>
+            </el-row>
+            <el-row>
+                <el-table
+                        :row-class-name="tableRowClassName"
+                        :data="table_data"
+                        style="width: 100%"
+                        @row-click="handleClick"
+                >
+                    <el-table-column
+                            prop="device_serial"
+                            label="SN"
+                            width="180">
+                    </el-table-column>
+                    <el-table-column
+                            prop="device_model"
+                            label="Data Terminal Model"
+                            width="240">
+                    </el-table-column>
+                    <el-table-column
+                            prop="device_location"
+                            label="Location"
+                            width="180">
+                    </el-table-column>
+                    <el-table-column
+                            prop="metric_name"
+                            label="Metric">
+                    </el-table-column>
+                    <el-table-column
+                            prop="metric_value"
+                            label="Value">
+                    </el-table-column>
+                    <el-table-column
+                            prop="logging_time"
+                            label="Logging Time">
+                    </el-table-column>
+                </el-table>
+            </el-row>
+        </el-main>
+    </el-container>
+</div>
 
+<style>
+    .el-header {
+        margin-top: 20px;
+    }
+
+    .el-row {
+        margin-bottom: 20px;
+    }
+
+    .el-table .warning-row {
+        background: #F9E7CE;
+    }
+
+    .el-table .normal-row {
+        background: #DAF2CE;
+    }
+
+    .el-table .error-row {
+        background: #FBDBDB;
+    }
+</style>
+
+<script>
+    Vue.config.devtools = true;
+    let vm = new Vue({
+        el: '#app',
+        data: {
+            table_data: [],
+            open_details: false,
+            device_data: '',
+            warning_list: [],
+            error_list: [],
+            normal_list: [],
+            dialogTitle: '',
+            timer: '',
+            critical_threshold: 0.5,
+            image_data: []
+        },
+
+
+        created: function () {
+            this.timer = setInterval(function () {
+                window.location.reload();
+            }, 300000);
+        },
+        mounted: function () {
+            this.inIt();
+        },
+        beforeDestroy: function () {
+            this.cancelAutoUpdate();
+        },
+
+        methods: {
+            getAllImages() {
+                let self = this;
+                axios({
+                    url: '/api/get_images',
+                    method: 'GET',
+                }).then((response) => {
+                    self.image_data = response.data.image_data;
+                    console.log(self.image_data);
+                })
+            },
+            cancelAutoUpdate() {
+                clearInterval(this.timer);
+            },
+            plotLineChart: function () {
+                google.charts.load('current', {packages: ['corechart', 'line']});
+                google.setOnLoadCallback(this.drawBackgroundColor);
+            },
+            drawBackgroundColor: function () {
+                let self = this;
+                var data = new google.visualization.DataTable();
+                data.addColumn('datetime', 'time');
+                data.addColumn('number', 'Average');
+                data.addColumn('number', self.device_data[0].metric_name);
+                let avg;
+                for (let i = 0; i < self.table_data.length; i++) {
+                    if (self.device_data[0].device_serial === self.table_data[i].device_serial && self.device_data[0].metric_name === self.table_data[i].metric_name) {
+                        avg = self.table_data[i].avg_value;
+                    }
+                }
+                for (let i = 0; i < self.device_data.length; i++) {
+                    data.addRows([[new Date(self.device_data[i].logging_time), Number(avg), Number(self.device_data[i].metric_value)]]);
+                }
+                var options = {
+                    hAxis: {
+                        title: 'Time'
+                    },
+                    vAxis: {
+                        title: 'Value'
+                    },
+                    backgroundColor: '#ffffff'
+                };
+                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                chart.draw(data, options);
+            },
+            getErrorDescriptionText: function (item) {
+                return "Critical value detected on site: " + item.device_location + "; Metric/Channel: " + item.metric_name +
+                    "; Reference: Value/Average value: " + item.metric_value.toFixed(4) + "/" + item.avg_value.toFixed(4);
+            },
+            getWarningDescriptionText: function (item) {
+                return "Low value detected on site: " + item.device_location + "; Metric/Channel: " + item.metric_name +
+                    "; Reference: Value/Average value: " + item.metric_value.toFixed(4) + "/" + item.avg_value.toFixed(4);
+            },
+            handleClick: function (value) {
+                let self = this;
+                axios({
+                    url: '/api/get_device_log',
+                    method: 'GET',
+                    params: {
+                        device_serial: value.device_serial,
+                        metric_name: value.metric_name,
+                    }
+                }).then((response) => {
+                    self.device_data = response.data.device_log;
+                    self.dialogTitle = "History data for device on: " + value.device_location + "@" + value.metric_name;
+                    self.open_details = true;
+                    self.plotLineChart();
+                })
+            },
+            tableRowClassName({row}) {
+                if (row.metric_value <= this.critical_threshold * row.avg_value) {
+                    return 'error-row';
+                } else if (row.metric_value <= row.avg_value) {
+                    return 'warning-row';
+                }
+                return 'normal-row';
+            },
+            inIt: function () {
+                this.load_latest_status();
+            },
+            load_latest_status: function () {
+                let self = this;
+                axios({
+                    url: '/api/get_latest_status',
+                    method: 'GET',
+                }).then((response) => {
+                    self.table_data = response.data.latest_status;
+                    self.critical_threshold = response.data.critical_threshold;
+                    self.error_list = [];
+                    self.warning_list = [];
+                    for (let i = 0; i < response.data.latest_status.length; i++) {
+                        if (response.data.latest_status[i].metric_value < self.critical_threshold * response.data.latest_status[i].avg_value) {
+                            self.error_list.push(response.data.latest_status[i]);
+                        } else if (response.data.latest_status[i].metric_value < response.data.latest_status[i].avg_value) {
+                            self.warning_list.push(response.data.latest_status[i]);
+                        } else {
+                            self.normal_list.push(response.data.latest_status[i]);
+                        }
+                    }
+                    this.getAllImages();
+                })
+            },
+
+        },
+    })
+</script>
