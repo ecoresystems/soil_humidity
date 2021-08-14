@@ -63,7 +63,8 @@
     <el-container>
         <el-main>
             <el-row>
-                <el-carousel indicator-position="inside" :interval="10000" height="300px">
+                <el-col :span="8" :offset="8">
+                <el-carousel type="card" :interval="5000" height="300px">
                     <el-carousel-item :label="item.description" v-for="item,index in image_data" :key="index" >
                         <el-image
                                 :src="'data:image/jpeg;base64,'+item.base64_str"
@@ -71,6 +72,7 @@
                         </el-image>
                     </el-carousel-item>
                 </el-carousel>
+            </el-col>
             </el-row>
             <el-row v-for="error_item in error_list">
                 <el-alert
