@@ -53,9 +53,7 @@ def ito():
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect("ito.cc.kyushu-u.ac.jp", username='q70209a', pkey=key)
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("pjstat")
-    print(ssh_stdout.read())
-    print(ssh_stderr.read())
-    return render_template('ito.html', status=ssh_stdout)
+    return render_template('ito.html', status=ssh_stdout.read())
 
 
 @app.route('/api/get_latest_status', methods=['GET'])
